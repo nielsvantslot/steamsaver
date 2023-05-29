@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Steam saver",
+  "description": "Verify steam sites in real time.",
+  "version": "1.0.1",
+  "icons": {
+    "128": "img/steam_saver.png"
+  },
+  "action": {
+    "default_icon": "img/steam_saver.png"
+  },
+  "background": {
+    "service_worker": "js/index.js"
+  },
+  "host_permissions": ["*://*/*"],
+		"content_security_policy": {
+	  "extension_pages": "default-src 'self'; connect-src *"
+	},
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+	"content_scripts": [
+    {
+      "matches": [
+        "*://steamcommunity.com/*/inventory/*",
+        "*://steamcommunity.com/*/inventory"
+      ],
+      "js": [
+        "js/overwriteInjector.js"
+      ],
+			"css": [
+        "css/steamInventory.css"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+	"web_accessible_resources": [
+    {
+      "resources": [
+        "js/overwrites/steamInventory.js"
+      ],
+      "matches": [
+        "*://*/*"
+      ]
+    }
+  ]
+}

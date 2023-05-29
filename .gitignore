@@ -1,0 +1,49 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+
+# Build output
+dist/chrome
+dist/firefox
+build/chrome
+build/firefox
+
+# Environment variables
+.env
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.swm
+*.sublime*
+*.sublime-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Tests
+coverage/
+
+# Miscellaneous
+*.tmp
+*.bak
+*.zip
+*.tgz
+*.rar
+*.tar
+*.gz
+*.csv
+*.sqlite
+
+tools/key
