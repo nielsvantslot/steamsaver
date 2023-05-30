@@ -1,6 +1,5 @@
 .inventory_page_right
 {
-    /* position: fixed !important; */
     top: 5vh;
     right: calc(50vw - 900px);
 }
@@ -27,6 +26,13 @@
 {
     width: 120px !important;
     height: 120px !important;
+}
+
+@media screen and (max-width: 910px) {
+  html.responsive .itemHolder {
+    max-width: unset !important;
+    max-height: unset !important;
+  }
 }
 
 .view_inventory_page .item.activeInfo,

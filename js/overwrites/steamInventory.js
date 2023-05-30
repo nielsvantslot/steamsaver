@@ -1403,16 +1403,14 @@ CInventory.prototype.TagCheckboxChanged = function( )
 
 CInventory.prototype.GetPageItems = function( iPage )
 {
-	var iStart = iPage * INVENTORY_PAGE_ITEMS;
-	var iEnd = iStart + INVENTORY_PAGE_ITEMS;
-	var rgItemHolders = [];
-	for ( var iItem = iStart; iItem < this.m_rgItemElements.length && iItem < iEnd; iItem++ )
-	{
-		var $ItemHolder = this.GetItemElement( iItem );
-		rgItemHolders.push( $ItemHolder );
-	}
+    var rgItemHolders = [];
+    for ( var iItem = 0; iItem < this.m_rgItemElements.length; iItem++ )
+    {
+        var $ItemHolder = this.GetItemElement( iItem );
+        rgItemHolders.push( $ItemHolder );
+    }
 
-	return rgItemHolders;
+    return rgItemHolders;
 }
 
 CInventory.prototype.AppendPage = function( $Page, iPage )
@@ -1573,38 +1571,16 @@ CInventory.prototype.UpdatePageCounts = function()
 
 CInventory.prototype.LayoutPages = function()
 {
-	this.EnsureItemHoldersCreated();
+    this.EnsureItemHoldersCreated();
 
-	this.m_$Inventory.children().detach();
+    this.m_$Inventory.children().detach();
+    this.m_SingleResponsivePage.hide();
+    this.m_rgPages = [ this.m_SingleResponsivePage ];
 
-	if ( g_bEnableDynamicSizing )
-	{
-		this.m_SingleResponsivePage.hide();
-		this.m_rgPages = [ this.m_SingleResponsivePage ];
-	}
-	else
-	{
-		this.m_rgPages = [];
+    this.m_cPages = this.m_rgPages.length;
 
-		var iPage = 0;
-		this.m_rgPages.push( new CPage( this, iPage++ ) );
-		var cPageItemsRemaining = INVENTORY_PAGE_ITEMS;
-
-		for ( var iItem = 0; iItem < this.m_rgItemElements.length; iItem++ )
-		{
-			var $ItemHolder = this.m_rgItemElements[iItem];
-			if ( cPageItemsRemaining-- <= 0 )
-			{
-				this.m_rgPages.push( new CPage( this, iPage++ ) );
-				cPageItemsRemaining = INVENTORY_PAGE_ITEMS - 1;
-			}
-		}
-	}
-
-	this.m_cPages = this.m_rgPages.length;
-
-	this.m_bNeedsRepagination = false;
-	this.SetActivePage( this.m_iCurrentPage );
+    this.m_bNeedsRepagination = false;
+    this.SetActivePage( this.m_iCurrentPage );
 };
 
 CInventory.prototype.MakeActive = function()
@@ -5576,18 +5552,16 @@ function InitDynamicInventoryItemAutosizing( $InventoryCtn, strCSSClass, bAutoRe
 	var bDynamicWasSizingEnabled;
 	$J(window ).off('resize.EconomyRepaginateInventory' ).on('resize.EconomyRepaginateInventory', function() {
 		// this flag is used by inventories in a few places
-		// if ( Economy_UseResponsiveLayout() )
-		// {
-		// 	g_bEnableDynamicSizing = true;
-		// }
-		// else
-		// {
-		// 	g_bEnableDynamicSizing = false;
-		// }
+		if ( Economy_UseResponsiveLayout() )
+		{
+			g_bEnableDynamicSizing = true;
+		}
+		else
+		{
+			g_bEnableDynamicSizing = false;
+		}
 
-		g_bEnableDynamicSizing = true;
-
-		if ( g_bEnableDynamicSizing )
+		if ( bDynamicWasSizingEnabled != g_bEnableDynamicSizing )
 		{
 			bDynamicWasSizingEnabled = g_bEnableDynamicSizing;
 			if ( typeof UserYou != 'undefined' && UserYou )
@@ -5608,7 +5582,7 @@ function InitDynamicInventoryItemAutosizing( $InventoryCtn, strCSSClass, bAutoRe
 
 	$J(window ).on('resize.DynamicInventorySizing', function() {
 
-		if ( !g_bEnableDynamicSizing )
+		if ( !Economy_UseResponsiveLayout() )
 		{
 			$InventoryCtn.removeClass('dynamicSizing');
 			return;

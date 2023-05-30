@@ -28,7 +28,8 @@
         "*://steamcommunity.com/*/inventory"
       ],
       "js": [
-        "js/overwriteInjector.js"
+        "js/overwriteInjector.js",
+        "js/sidebarSticky.js"
       ],
 			"css": [
         "css/steamInventory.css"
