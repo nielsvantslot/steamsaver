@@ -1,46 +1,34 @@
-if (typeof init === 'undefined') {
+// Watches a page that is not a Steam site for Valve's copyright footer, which only a copy of
+// a Steam page would contain. Reports to the background script, which marks the tab as harmful.
+(function () {
+  if (window.steamSaverWatching) return;
+  window.steamSaverWatching = true;
 
-  const init = function() {
-    let interval;
+  const engine = typeof browser !== 'undefined' ? browser : chrome;
+  const footer = /© Valve Corporation\. All rights reserved\. All trademarks are property of their respective owners in the US and other countries\./i;
+  const MAX_CHECKS = 60;
 
-    const engine = typeof browser !== 'undefined' ? browser : chrome;
-    const mainContent = document.getElementById("mainContents");
-    const regex = /\/inventory\/?(#\d+)?$/;
+  let checks = 0;
 
-    if (regex.test(window.location.href)) {
-      try {
-        const children = mainContent.querySelectorAll("*");
-
-        if (children.length === 1 && children[0].tagName === "H2") {
-          const newUrl = window.location.href.replace(/\/inventory\/?/, "/inventory/?xml=1");
-          window.location.href = newUrl;
-        }
-      } catch (e) {
-
-      }
+  const hasFooter = function (doc) {
+    try {
+      return !!doc.body && footer.test(doc.body.textContent);
+    } catch (e) {
+      // cross-origin frame, can't look inside
+      return false;
     }
+  };
 
-    function checkSite () {
-      try {
-        const iframes = document.querySelectorAll('iframe');
+  const check = function () {
+    const documents = [document, ...[...document.querySelectorAll('iframe')].map((frame) => frame.contentDocument)];
 
-        for (let frame of iframes) {
-          if (frame && frame.contentWindow.document.body && frame.contentWindow.document.body.textContent.match(/© Valve Corporation\. All rights reserved\. All trademarks are property of their respective owners in the US and other countries\./i)) {
-              clearInterval(interval);
-              browser.runtime.sendMessage({ message: 'textFound' }, function(response) {
-                if (browser.runtime.lastError) {
-                  console.error(browser.runtime.lastError);
-                }
-              });
-              break;
-          }
-        }
-      } catch (e) {
-
-      }
+    if (documents.some((doc) => doc && hasFooter(doc))) {
+      clearInterval(interval);
+      engine.runtime.sendMessage({ message: 'textFound' }).catch(() => {});
+    } else if (++checks >= MAX_CHECKS) {
+      clearInterval(interval);
     }
+  };
 
-    interval = setInterval(checkSite, 1000);
-  }
-  init();
-}
+  const interval = setInterval(check, 1000);
+})();
