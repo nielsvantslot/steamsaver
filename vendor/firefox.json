@@ -1,0 +1,14 @@
+{
+  "background": {
+    "scripts": [
+      "js/background/index.js"
+    ],
+    "type": "module"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "steam-saver@nielsvantslot.github.io",
+      "strict_min_version": "128.0"
+    }
+  }
+}

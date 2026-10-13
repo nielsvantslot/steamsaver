@@ -1,28 +1,19 @@
 {
   "name": "steamsaver",
-  "version": "1.0.0",
-  "description": "chrome extention which verifies steam pages",
-  "main": "index.js",
+  "version": "1.0.1",
+  "description": "Browser extension which verifies Steam pages and shows a whole Steam inventory on one page",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "watch": "gulp watch",
-    "build": "gulp build",
-    "dist": "gulp dist",
-    "dist-chrome": "gulp dist-chrome",
-    "dist-firefox": "gulp dist-firefox"
+    "build": "node scripts/build.js",
+    "dist": "node scripts/dist.js",
+    "test": "node --test test/*.test.js",
+    "test:e2e": "node --test test/e2e/*.test.js"
   },
   "author": "Nutty#9945",
   "license": "ISC",
-  "dependencies": {
-    "browser-extension": "^0.1.1",
-    "chrome-extension": "0.0.1",
-    "crx3": "^1.1.3",
-    "event-stream": "^4.0.1",
-    "gulp": "^4.0.2",
-    "gulp-bump": "^3.2.0",
-    "gulp-clean": "^0.4.0",
-    "gulp-util": "^3.0.8",
-    "gulp-zip": "^5.1.0",
-    "run-sequence": "^2.2.1"
-  },
-  "devDependencies": {}
+  "devDependencies": {
+    "adm-zip": "^0.5.16",
+    "playwright": "1.61"
+  }
 }
