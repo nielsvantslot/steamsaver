@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "Browser extension which verifies Steam pages and shows a whole Steam inventory on one page",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
     "dist": "node scripts/dist.js",

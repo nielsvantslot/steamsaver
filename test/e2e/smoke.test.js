@@ -2,15 +2,16 @@
 // `npx playwright install chromium` and opens a visible window (extensions don't run headless).
 // The inventory part loads a public Steam inventory, so it breaks when Steam changes its pages
 // and is skipped when Steam doesn't respond (it rate limits repeated loads).
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const os = require('node:os');
-const path = require('node:path');
-const fs = require('node:fs');
-const { chromium } = require('playwright');
-const { build } = require('../../scripts/build');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import os from 'node:os';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright';
+import { build } from '../../scripts/build.js';
 
-const EXTENSION = path.join(__dirname, '..', '..', 'build', 'chrome');
+const EXTENSION = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'build', 'chrome');
 const INVENTORY_URL = process.env.STEAM_INVENTORY_URL || 'https://steamcommunity.com/id/n_tty/inventory/#730_2';
 const FOOTER = '© Valve Corporation. All rights reserved. All trademarks are property of their respective owners in the US and other countries.';
 
@@ -39,6 +40,11 @@ test.before(async () => {
   }
 
   serviceWorker = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker');
+
+  // the worker exists a moment before its script has registered the listeners
+  for (let attempt = 0; attempt < 50 && !await serviceWorker.evaluate(() => chrome.tabs.onUpdated.hasListeners()); attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 });
 
 test.after(async () => {

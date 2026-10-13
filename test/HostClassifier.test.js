@@ -1,6 +1,11 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const { classifyHost } = require('../js/verdict.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { domainToASCII } from 'node:url';
+import { HostClassifier } from '../js/background/HostClassifier.js';
+import { Verdict } from '../js/background/verdict.js';
+
+const classifier = HostClassifier.withDefaultRules();
+const classifyHost = (hostname) => classifier.classify(hostname);
 
 test('official Steam hosts are safe', () => {
   for (const host of [
@@ -51,8 +56,6 @@ test('a trusted domain only counts as a real suffix', () => {
 
 test('internationalized lookalikes are harmful', () => {
   // browsers hand us the punycode form of hostnames with non-ASCII characters
-  const { domainToASCII } = require('node:url');
-
   for (const host of [
     'stеamcommunity.com', // cyrillic е
     'steаmpowered.com', // cyrillic а
@@ -69,9 +72,15 @@ test('internationalized lookalikes are harmful', () => {
 });
 
 test('other internationalized hosts are neutral', () => {
-  const { domainToASCII } = require('node:url');
-
   for (const host of ['münchen.de', 'пример.рф', '日本語.jp']) {
     assert.equal(classifyHost(domainToASCII(host)), 'neutral', host);
   }
+});
+
+test('rules are tried in order and the first opinion wins', () => {
+  const answers = (verdict) => ({ evaluate: () => verdict });
+
+  assert.equal(new HostClassifier([answers(null), answers(Verdict.SAFE), answers(Verdict.HARMFUL)]).classify('a.com'), Verdict.SAFE);
+  assert.equal(new HostClassifier([answers(null)]).classify('a.com'), Verdict.NEUTRAL);
+  assert.equal(new HostClassifier([]).classify('a.com'), Verdict.NEUTRAL);
 });

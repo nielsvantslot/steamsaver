@@ -27,15 +27,35 @@ Then load the unpacked folder `build/chrome` at `chrome://extensions` (developer
 | command | what it does |
 | --- | --- |
 | `npm run build` | builds `build/chrome` and `build/firefox` from `js/`, `css/`, `img/` and `vendor/` |
-| `npm test` | unit tests of the hostname classification (`js/verdict.js`) |
+| `npm test` | unit tests: the hostname rules, `TabGuard` against a fake browser, the presenters |
 | `npm run test:e2e` | opens Chromium with the built extension and checks the banners, the badge and a real public inventory (needs `npx playwright install chromium`, the inventory part needs Steam to respond) |
 
 The manifest is `vendor/manifest.json` plus the browser specific parts in `vendor/chrome.json` and `vendor/firefox.json`.
 
 ### How it works
 
-- `js/index.js` is the background script. It classifies the hostname of a page with `js/verdict.js` when it finishes loading, sets the badge and injects the box. `js/scripts/mutation.js` is injected into pages that are not official Steam sites and looks for Valve's footer.
-- `js/pagePatch.js` runs inside the inventory page itself (`"world": "MAIN"`). It leaves Steam's own `economy_v2.js` alone and only switches it to Steam's responsive layout, which has one continuously scrolling page. It also repairs the grid if something removes the loaded items afterwards.
-- `css/steamInventory.css` lays out the item grid and pins the info panel.
+```
+js/background/   ES modules: the background script (a service worker in Chrome)
+  index.js             wires everything together, nothing else
+  TabGuard.js          checks a page when it has loaded and tells the presenters what to show
+  HostClassifier.js    runs a hostname through the rules, the first opinion wins
+  hostRules.js         one class per kind of check: TrustedDomainRule, KnownToolRule, LookalikeRule
+  idn.js               punycode and lookalike letters (Cyrillic, Greek) back to what you see
+  BadgePresenter.js    verdict on the toolbar icon (a page can't imitate this)
+  BannerPresenter.js   verdict as a box in the page (banner.js is the code that runs in the page)
+  FooterScanner.js     starts the footer watcher in a tab
+js/content/      classic scripts, browsers can't load content scripts as modules
+  footerWatcher.js     looks for Valve's copyright footer on pages that aren't Steam
+  inventoryPatch.js    patches Steam's own inventory script in the page (see below)
+css/steamInventory.css lays out the item grid and pins the info panel
+```
 
-The inventory part relies on a few internals of Steam's script (`InitDynamicInventoryItemAutosizing`, `g_bEnableDynamicSizing`, `CSingleResponsivePage`). If Steam renames them the extension logs a warning in the console and the inventory falls back to Steam's normal paged view. `npm run test:e2e` is the quickest way to notice.
+The browser API is passed into the classes (`new TabGuard({ tabs, runtime, ... })`) instead of being used as a global, so `npm test` can run them against a fake browser.
+
+**Adding a check:** write a class with `evaluate(hostname)` that returns a `Verdict` or `null` in `hostRules.js` and add it to `HostClassifier.withDefaultRules()`.
+
+**Showing the verdict somewhere else:** write a class with `show(tabId, verdict)` and `reset(tabId)` and add it to `presenters` in `index.js`.
+
+#### The inventory patch
+
+`inventoryPatch.js` runs inside the inventory page itself (`"world": "MAIN"`). It leaves Steam's own `economy_v2.js` alone and patches a few of its functions right after it has run. Each patch is a class that lists the Steam internals it relies on: `ContinuousScrollPatch`, `EagerItemsPatch` and `ItemGridRepair`, which repairs the grid if something removes the loaded items. If Steam renames one of them, that patch is skipped with a warning in the console and the inventory falls back to Steam's normal paged view. `npm run test:e2e` is the quickest way to notice.

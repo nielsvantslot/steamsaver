@@ -32,7 +32,7 @@
         "https://steamcommunity.com/*/inventory"
       ],
       "js": [
-        "js/pagePatch.js"
+        "js/content/inventoryPatch.js"
       ],
       "world": "MAIN",
       "run_at": "document_start"

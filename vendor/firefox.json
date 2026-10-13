@@ -1,9 +1,9 @@
 {
   "background": {
     "scripts": [
-      "js/verdict.js",
-      "js/index.js"
-    ]
+      "js/background/index.js"
+    ],
+    "type": "module"
   },
   "browser_specific_settings": {
     "gecko": {

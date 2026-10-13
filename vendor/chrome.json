@@ -1,5 +1,6 @@
 {
   "background": {
-    "service_worker": "js/index.js"
+    "service_worker": "js/background/index.js",
+    "type": "module"
   }
 }

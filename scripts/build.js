@@ -1,16 +1,19 @@
 // Builds one unpacked extension per browser into build/<browser>.
 // The manifest is vendor/manifest.json plus the browser specific parts of vendor/<browser>.json,
 // with the version taken from package.json (bump it with `npm version patch`).
-const fs = require('node:fs');
-const path = require('node:path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const root = path.join(__dirname, '..');
-const BROWSERS = ['chrome', 'firefox'];
+const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+export const BROWSERS = ['chrome', 'firefox'];
+
 const FOLDERS = ['js', 'css', 'img'];
 
 const readJson = (file) => JSON.parse(fs.readFileSync(path.join(root, file), 'utf8'));
 
-const build = function () {
+export const build = function () {
   const { version } = readJson('package.json');
   const base = readJson('vendor/manifest.json');
 
@@ -31,6 +34,4 @@ const build = function () {
   }
 };
 
-if (require.main === module) build();
-
-module.exports = { build, BROWSERS };
+if (import.meta.url === pathToFileURL(process.argv[1]).href) build();
