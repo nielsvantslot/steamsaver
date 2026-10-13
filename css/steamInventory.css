@@ -1,19 +1,23 @@
 .inventory_page_right
 {
-    top: 5vh;
-    right: calc(50vw - 900px);
+    /* stays in view while scrolling through the items, and stops at the end of the inventory */
+    position: sticky !important;
+    top: 1.4vh !important;
+    right: auto !important;
+    float: right;
+    margin-right: -441px;
 }
 
 .inventory_page_left,
 .trade_item_box,
 .inventory_ctn,
-.inventory_page
+.inventory_ctn .inventory_page
 {
     width: 100% !important;
     height: auto !important;
 }
 
-.inventory_page
+.inventory_ctn .inventory_page
 {
     display: flex;
     flex-wrap: wrap;
