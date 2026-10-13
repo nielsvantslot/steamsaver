@@ -4,7 +4,7 @@ Browser extension (Chrome and Firefox, manifest v3) that does two things:
 
 1. **Verifies Steam pages.** Every page you open is classified from its hostname:
    - official Steam domains (`steamcommunity.com`, `steampowered.com`, `steamgames.com` and their subdomains) get a green *"This site is safe"* box and a ✓ on the toolbar icon
-   - sites that imitate Steam (`stearncommunity.com`, `steamcomunnity.com`, `ste4mpowered.com`, `steamcommunity.com.evil.com`, ...) get a red *"Potentially harmful site"* box and a **!** on the icon
+   - sites that imitate Steam (`stearncommunity.com`, `steamcomunnity.com`, `ste4mpowered.com`, `steamcommunity.com.evil.com`, and Unicode lookalikes such as a Cyrillic "е" in `stеamcommunity.com`, ...) get a red *"Potentially harmful site"* box and a **!** on the icon
    - pages that are not Steam but contain Valve's copyright footer (a copied Steam page) are marked harmful too
    - known third-party tools (SteamDB, Steamfolio, Steam Inventory Helper) are left alone
 

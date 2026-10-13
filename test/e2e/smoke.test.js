@@ -45,12 +45,7 @@ test.after(async () => {
   await context?.close();
 });
 
-const verdictOf = async function (url) {
-  const page = await context.newPage();
-
-  await page.goto(url);
-  await page.waitForTimeout(3500);
-
+const readVerdict = async function (page, url) {
   const banner = await page.locator('.steam_saver').allInnerTexts();
   const badge = await serviceWorker.evaluate(async (tabUrl) => {
     const [tab] = await chrome.tabs.query({ url: tabUrl });
@@ -58,9 +53,31 @@ const verdictOf = async function (url) {
     return chrome.action.getBadgeText({ tabId: tab.id });
   }, url);
 
+  return { banner, badge };
+};
+
+// The verdict shows up a moment after the page loaded, so wait until it stops changing
+const verdictOf = async function (url) {
+  const page = await context.newPage();
+
+  await page.goto(url);
+  await page.waitForTimeout(1500);
+
+  let previous = JSON.stringify(await readVerdict(page, url));
+
+  for (let attempt = 0; attempt < 10; attempt++) {
+    await page.waitForTimeout(700);
+
+    const current = JSON.stringify(await readVerdict(page, url));
+
+    if (current === previous) break;
+
+    previous = current;
+  }
+
   await page.close();
 
-  return { banner, badge };
+  return JSON.parse(previous);
 };
 
 test('official Steam hosts get the safe banner and badge', async () => {

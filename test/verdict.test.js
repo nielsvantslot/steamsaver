@@ -48,3 +48,30 @@ test('a trusted domain only counts as a real suffix', () => {
   assert.equal(classifyHost('notsteamcommunity.com'), 'harmful');
   assert.equal(classifyHost('steamcommunity.com.'), 'safe');
 });
+
+test('internationalized lookalikes are harmful', () => {
+  // browsers hand us the punycode form of hostnames with non-ASCII characters
+  const { domainToASCII } = require('node:url');
+
+  for (const host of [
+    'stеamcommunity.com', // cyrillic е
+    'steаmpowered.com', // cyrillic а
+    'steamcоmmunity.com', // cyrillic о
+    'ѕteamcommunity.com', // cyrillic ѕ
+    'steаm.com', // cyrillic а, nothing else to go on
+    'ѕteam-trade.net',
+  ]) {
+    const ascii = domainToASCII(host);
+
+    assert.match(ascii, /xn--/, `${host} is punycode`);
+    assert.equal(classifyHost(ascii), 'harmful', ascii);
+  }
+});
+
+test('other internationalized hosts are neutral', () => {
+  const { domainToASCII } = require('node:url');
+
+  for (const host of ['münchen.de', 'пример.рф', '日本語.jp']) {
+    assert.equal(classifyHost(domainToASCII(host)), 'neutral', host);
+  }
+});
